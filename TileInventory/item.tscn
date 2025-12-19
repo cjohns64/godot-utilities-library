@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://xexgivj5yp3t"]
+
+[ext_resource type="Script" uid="uid://h6qwubrbv1qc" path="res://TileInventory/item.gd" id="1_k3f00"]
+
+[node name="Item" type="Node"]
+script = ExtResource("1_k3f00")
+h = 3
+w = 4
+shape_str = "001001100011"
+metadata/_custom_type_script = "uid://h6qwubrbv1qc"
