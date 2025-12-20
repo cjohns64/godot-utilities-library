@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://oqdp3wj6nia8"]
+
+[ext_resource type="Script" uid="uid://cmi4lvx0gugcv" path="res://TileInventory/tile_inventory.gd" id="1_tjaw4"]
+
+[node name="TileInventory" type="Node"]
+script = ExtResource("1_tjaw4")
+h = 5
+w = 7
+stacking = true
+metadata/_custom_type_script = "uid://cmi4lvx0gugcv"

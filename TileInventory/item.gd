@@ -1,10 +1,12 @@
 class_name Item extends Node
 
-@export var h:int
-@export var w:int
+@export_range(0, 100) var h:int
+@export_range(0, 100) var w:int
 @export var shape_str:String
 var shape:Array[bool] = []
 var debug:bool = true
+@warning_ignore("integer_division")
+@onready var origin:Vector2i = Vector2i(w/2, h/2)
 
 func _init(_h:int=0, _w:int=0) -> void:
 	if _h > 0:
@@ -18,13 +20,16 @@ func set_shape(_shape:Array[bool]) -> void:
 
 func init_shape() -> void:
 	# setup item shape matrix
-	#print("init shape")
+	shape = []
 	if len(shape_str) >= w*h:
 		for i in (h * w):
 			shape.append(shape_str[i] == "1")
 	else:
 		for i in (h * w):
 			shape.append(false)
+	# recalculate origin
+	@warning_ignore("integer_division")
+	origin = Vector2i(w/2, h/2)
 
 func get_cell(row:int, col:int) -> bool:
 	return shape[row*w + col]
@@ -36,14 +41,19 @@ func _ready():
 	self.init_shape()
 	self.print_shape()
 
+@warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
 	if debug:
+		#print("item base")
+		#self.print_shape()
 		#print("transpose")
 		#self.transpose().print_shape()
 		#print("rotate left")
 		#self.rotate_left().print_shape()
 		#print("rotate right")
 		#self.rotate_right().print_shape()
+		#print("Extent")
+		#print(self.find_extent())
 		debug = false
 
 func transpose() -> Item:
@@ -78,7 +88,29 @@ func rotate_right() -> Item:
 			new_item.set_cell(row, new_item.w - col - 1, tmp)
 	return new_item
 
+func find_extent() -> Vector4i:
+	var min_r:int = 2*h
+	var max_r:int = 0
+	var min_c:int = 2*w
+	var max_c:int = 0
+	for i in h:
+		for j in w:
+			# check if cell has a value
+			if self.get_cell(i, j):
+				# update min row and col
+				if min_r > i:
+					min_r = i
+				if min_c > j:
+					min_c = j
+				# update max row and col
+				if max_r < i:
+					max_r = i
+				if max_c < j:
+					max_c = j
+	return Vector4i(min_r, max_r, min_c, max_c)
+
 func print_shape() -> void:
+	print(origin)
 	for i in h:
 		var row:String = ""
 		for j in w:

@@ -4,7 +4,7 @@
 
 [node name="Item" type="Node"]
 script = ExtResource("1_k3f00")
-h = 3
+h = 4
 w = 4
-shape_str = "001001100011"
+shape_str = "0011010101110100"
 metadata/_custom_type_script = "uid://h6qwubrbv1qc"
