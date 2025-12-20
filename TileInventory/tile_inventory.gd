@@ -2,7 +2,8 @@ class_name TileInventory extends Node
 
 @export_range(0, 200) var h:int
 @export_range(0, 200) var w:int
-@export var stacking:bool = false
+@export_range(1, 999) var max_inv_stack:int = 5
+@export var inv_stacking:bool = true
 var fill_tiles:Array[bool] = []
 var items:Array[Item] = []
 var item_pos:Array[Vector2i] = []
@@ -67,14 +68,32 @@ func index_at_pos(row:int, col:int) -> int:
 
 func find_item_index(item:Item) -> int:
 	for i in len(items):
-		if items[i] == item:
+		if items[i].equals(item):
 			return i
 	return -1 # did not find item
+
+func __is_stacking_enabled(item_index:int) -> bool:
+	# check if the item_index is valid
+	if item_index == -1 or item_index > len(self.items):
+		return false
+	# return if stacking is enabled
+	return self.inv_stacking and self.items[item_index].item_stacking
+
+func __check_stacking_limit(item_index:int) -> bool:
+	# return if the new item stack is under the limit
+	var limit:int = mini(self.items[item_index].max_item_stack, self.max_inv_stack)
+	return self.item_count[item_index] + 1 <= limit
+
+func check_stacking(item_index:int) -> bool:
+	# check if stacking is enabled
+	if __is_stacking_enabled(item_index):
+		# return if the new item stack is under the limit
+		return __check_stacking_limit(item_index)
+	return false
 
 # checks if item can be placed at offset, but does not place it
 func check(offset:Vector2i, item:Item) -> bool:
 	var extent:Vector4i = item.find_extent()
-	# TODO stacking overlap check
 	var item_index:int = self.find_item_index(item)
 	# check extent is within inventory
 	if offset[0] + extent[1] >= h or offset[1] + extent[3] >= w:
@@ -83,17 +102,31 @@ func check(offset:Vector2i, item:Item) -> bool:
 		return false # extent under min
 	for row in range(extent[0], extent[1]+1):
 		for col in range(extent[2], extent[3]+1):
-			if ((not stacking and self.get_cell(row + offset[0], col + offset[1])) 
-				or (stacking and item_index != -1 and 
-					self.index_at_pos(row + offset[0], col + offset[1]) == item_index)):
-				# item conflict
-				return false
-	return true # no conflict
+			# check if stacking is allowed
+			if __is_stacking_enabled(item_index):
+				# stacking is allowed
+				# only allow overlap with the same item type
+				var target_index:int = self.index_at_pos(row + offset[0], col + offset[1])
+				if target_index == -1:
+					# empty tile
+					pass # does not affect check result
+				elif (target_index == item_index and __check_stacking_limit(item_index)):
+					# a same item overlap does not need to overlap perfectly
+					# new item will be placed at location of existing item
+					return true # overlap and passed conditions
+				else:
+					return false # at least one tile will conflict
+			else:
+				# no stacking, just check if the tile is occupied
+				if self.get_cell(row + offset[0], col + offset[1]):
+					return false # at least one tile will conflict
+	# all tiles checked, no conflicts found
+	return true
 
 # adds item to inventory -- does not check if it fits
 func __add_item(offset:Vector2i, item:Item) -> void:
 	var index:int = self.find_item_index(item)
-	if index != -1 and stacking:
+	if check_stacking(index):
 		# add to existing index
 		self.item_count[index] += 1
 	else:
@@ -166,9 +199,12 @@ func _process(delta: float) -> void:
 		item1.print_shape()
 		self.check_add(Vector2i(0, -1), item1)
 		self.check_add(Vector2i(0, 1), item1)
+		self.check_add(Vector2i(0, 1), item1)
+		self.check_add(Vector2i(0, 1), item1)
 		self.print_inventory()
 		print("remove item")
 		#self.remove_item_by_offset(Vector2i(1, 1))
-		self.remove_item_by_cell(3, 6)
+		self.remove_item_by_cell(2, 1)
+		self.remove_item_by_cell(2, 1)
 		self.print_inventory()
 		debug = false

@@ -3,10 +3,15 @@ class_name Item extends Node
 @export_range(0, 100) var h:int
 @export_range(0, 100) var w:int
 @export var shape_str:String
+@export_range(1, 999) var max_item_stack:int = 3
+@export var item_stacking:bool = true
 var shape:Array[bool] = []
 var debug:bool = true
 @warning_ignore("integer_division")
 @onready var origin:Vector2i = Vector2i(w/2, h/2)
+
+func equals(item:Item) -> bool:
+	return item == self
 
 func _init(_h:int=0, _w:int=0) -> void:
 	if _h > 0:
