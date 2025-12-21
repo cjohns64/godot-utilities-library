@@ -21,18 +21,18 @@ func set_fill(_fill:Array[bool]) -> void:
 	fill_tiles = _fill
 
 func add_to_fill(offset:Vector2i, item:Item) -> void:
-	self.__add_or_remove_to_fill(offset, item, true)
+	self.__add_or_remove_to_fill(item.get_abs_offset(offset), item, true)
 
 func remove_from_fill(offset:Vector2i, item:Item) -> void:
-	self.__add_or_remove_to_fill(offset, item, false)
+	self.__add_or_remove_to_fill(item.get_abs_offset(offset), item, false)
 
-func __add_or_remove_to_fill(offset:Vector2i, item:Item, add:bool=true) -> void:
-	var extent:Vector4i = item.find_extent()
-	for row in range(extent[0], extent[1]+1):
-		for col in range(extent[2], extent[3]+1):
+func __add_or_remove_to_fill(abs_offset:Vector2i, item:Item, add:bool=true) -> void:
+	item.trim_to_extent()
+	for row in item.h:
+		for col in item.w:
 			# map item local coords to inventory coords
 			if item.get_cell(row, col):
-				self.try_set_cell(row + offset[0], col + offset[1], add)
+				self.try_set_cell(row + abs_offset[0], col + abs_offset[1], add)
 
 func init_fill() -> void:
 	# setup item fill matrix
@@ -61,7 +61,7 @@ func index_at_pos(row:int, col:int) -> int:
 		var r:int = row - item_pos[i][0]
 		var c:int = col - item_pos[i][1]
 		if r >= items[i].h or r < 0 or c >= items[i].w or c < 0:
-			continue # invaild
+			continue # invalid
 		elif items[i].get_cell(r, c):
 			return i # match
 	return -1 # didn't find a match
@@ -92,35 +92,42 @@ func check_stacking(item_index:int) -> bool:
 	return false
 
 # checks if item can be placed at offset, but does not place it
-func check(offset:Vector2i, item:Item) -> bool:
-	var extent:Vector4i = item.find_extent()
+func check(rel_offset:Vector2i, item:Item) -> bool:
+	item.trim_to_extent()
+	var abs_offset:Vector2i = item.get_abs_offset(rel_offset)
 	var item_index:int = self.find_item_index(item)
 	# check extent is within inventory
-	if offset[0] + extent[1] >= h or offset[1] + extent[3] >= w:
+	if abs_offset[0] + item.h > h or abs_offset[1] + item.w > w:
+		print("check fail::exceeds grid", abs_offset)
 		return false # extent passes end of inventory
-	if offset[0] + extent[0] < 0 or offset[1] + extent[2] < 0:
+	if abs_offset[0] < 0 or abs_offset[1] < 0:
+		print("check fail::under grid")
 		return false # extent under min
-	for row in range(extent[0], extent[1]+1):
-		for col in range(extent[2], extent[3]+1):
+	for row in item.h:
+		for col in item.w:
 			# check if stacking is allowed
 			if __is_stacking_enabled(item_index):
 				# stacking is allowed
 				# only allow overlap with the same item type
-				var target_index:int = self.index_at_pos(row + offset[0], col + offset[1])
+				var target_index:int = self.index_at_pos(row + abs_offset[0], col + abs_offset[1])
 				if target_index == -1:
 					# empty tile
 					pass # does not affect check result
 				elif (target_index == item_index and __check_stacking_limit(item_index)):
 					# a same item overlap does not need to overlap perfectly
 					# new item will be placed at location of existing item
+					print("check pass::stacking")
 					return true # overlap and passed conditions
 				else:
+					print("check fail::conflict w/ stacking")
 					return false # at least one tile will conflict
 			else:
 				# no stacking, just check if the tile is occupied
-				if self.get_cell(row + offset[0], col + offset[1]):
+				if self.get_cell(row + abs_offset[0], col + abs_offset[1]):
+					print("check fail::conflict")
 					return false # at least one tile will conflict
 	# all tiles checked, no conflicts found
+	print("check pass::no issues")
 	return true
 
 # adds item to inventory -- does not check if it fits
@@ -196,15 +203,16 @@ func _process(delta: float) -> void:
 		var item1:Item = Item.new(4, 4)
 		item1.shape_str = "0011010101110100"
 		item1.init_shape()
+		item1.ID = "shape 1"
 		item1.print_shape()
-		self.check_add(Vector2i(0, -1), item1)
-		self.check_add(Vector2i(0, 1), item1)
-		self.check_add(Vector2i(0, 1), item1)
-		self.check_add(Vector2i(0, 1), item1)
+		var c:Array[bool] = []
+		c.append(self.check_add(Vector2i(0, -1), item1))
+		c.append(self.check_add(Vector2i(3, 4), item1.rotate_left()))
+		c.append(self.check_add(Vector2i(2, 2), item1.rotate_right()))
 		self.print_inventory()
-		print("remove item")
+		#print("remove item")
 		#self.remove_item_by_offset(Vector2i(1, 1))
-		self.remove_item_by_cell(2, 1)
-		self.remove_item_by_cell(2, 1)
-		self.print_inventory()
+		#self.remove_item_by_cell(2, 1)
+		#self.remove_item_by_cell(2, 1)
+		#self.print_inventory()
 		debug = false
