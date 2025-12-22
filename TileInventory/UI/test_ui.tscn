@@ -1,0 +1,137 @@
+[gd_scene load_steps=5 format=3 uid="uid://bjkyynlr4lwhf"]
+
+[ext_resource type="Script" uid="uid://5grm6cw632bf" path="res://TileInventory/UI/test_ui.gd" id="1_73ub3"]
+[ext_resource type="PackedScene" uid="uid://bhpyh13bdip01" path="res://TileInventory/UI/tile_inventory_ui.tscn" id="1_d305y"]
+[ext_resource type="Script" uid="uid://cmi4lvx0gugcv" path="res://TileInventory/tile_inventory.gd" id="2_vegq2"]
+[ext_resource type="Script" uid="uid://h6qwubrbv1qc" path="res://TileInventory/item.gd" id="4_qmr6s"]
+
+[node name="TestUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_73ub3")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="Test_interface_container" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="Update" type="Button" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+layout_mode = 2
+text = "Update"
+
+[node name="Add Item" type="Button" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+layout_mode = 2
+text = "Add Item"
+
+[node name="Remove Item" type="Button" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+layout_mode = 2
+text = "Remove Item"
+
+[node name="XOffsetContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/Test_interface_container/XOffsetContainer"]
+layout_mode = 2
+text = "Row Offset:"
+
+[node name="XOffsetInput" type="SpinBox" parent="PanelContainer/HBoxContainer/Test_interface_container/XOffsetContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+rounded = true
+
+[node name="YOffsetContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer"]
+layout_mode = 2
+text = "Col Offset:"
+
+[node name="YOffsetInput" type="SpinBox" parent="PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+rounded = true
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+layout_mode = 2
+
+[node name="OptionButton" type="OptionButton" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+layout_mode = 2
+allow_reselect = true
+item_count = 1
+popup/item_0/text = "Test"
+popup/item_0/id = 0
+
+[node name="VSeparator" type="VSeparator" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="TileInventory_UI" parent="PanelContainer/HBoxContainer" node_paths=PackedStringArray("inventory") instance=ExtResource("1_d305y")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+inventory = NodePath("../../../TileInventory")
+
+[node name="TileInventory" type="Node" parent="."]
+script = ExtResource("2_vegq2")
+h = 10
+w = 20
+metadata/_custom_type_script = "uid://cmi4lvx0gugcv"
+
+[node name="Items" type="Node" parent="."]
+
+[node name="Plus" type="Node" parent="Items"]
+script = ExtResource("4_qmr6s")
+h = 3
+w = 3
+ID = "Plus"
+shape_str = "010111010"
+metadata/_custom_type_script = "uid://h6qwubrbv1qc"
+
+[node name="X" type="Node" parent="Items"]
+script = ExtResource("4_qmr6s")
+h = 3
+w = 3
+ID = "X"
+max_item_stack = 6
+shape_str = "101010101"
+metadata/_custom_type_script = "uid://h6qwubrbv1qc"
+
+[node name="U" type="Node" parent="Items"]
+script = ExtResource("4_qmr6s")
+h = 3
+w = 3
+ID = "U"
+max_item_stack = 4
+shape_str = "101101111"
+metadata/_custom_type_script = "uid://h6qwubrbv1qc"
+
+[node name="LargeU" type="Node" parent="Items"]
+script = ExtResource("4_qmr6s")
+h = 4
+w = 4
+ID = "Large U"
+max_item_stack = 4
+shape_str = "1001100110011111"
+metadata/_custom_type_script = "uid://h6qwubrbv1qc"
+
+[connection signal="pressed" from="PanelContainer/HBoxContainer/Test_interface_container/Update" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="PanelContainer/HBoxContainer/Test_interface_container/Add Item" to="." method="_on_add_item_pressed"]
+[connection signal="pressed" from="PanelContainer/HBoxContainer/Test_interface_container/Remove Item" to="." method="_on_remove_item_pressed"]
+[connection signal="value_changed" from="PanelContainer/HBoxContainer/Test_interface_container/XOffsetContainer/XOffsetInput" to="." method="_on_offset_input_value_changed"]
+[connection signal="value_changed" from="PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer/YOffsetInput" to="." method="_on_offset_input_value_changed"]

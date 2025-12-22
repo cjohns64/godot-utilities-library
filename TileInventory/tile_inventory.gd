@@ -9,6 +9,9 @@ var items:Array[Item] = []
 var item_pos:Array[Vector2i] = []
 var item_count:Array[int] = []
 var debug:bool = true
+var last_conflict_pos:Vector2i = Vector2i.ZERO
+
+enum CHECK_STATUS {Fail_EX, Fail_UN, Fail_CNFL_ST, Fail_CNFL, Pass_ST, Pass}
 
 func _init(_h:int=0, _w:int=0) -> void:
 	if _h > 0:
@@ -55,23 +58,29 @@ func set_cell(row:int, col:int, data:bool) -> void:
 func _ready():
 	self.init_fill()
 
-func index_at_pos(row:int, col:int) -> int:
+func index_at_pos(inv_coords:Vector2i) -> int:
 	for i in len(items):
 		# check if row and col is active in item i
-		var r:int = row - item_pos[i][0]
-		var c:int = col - item_pos[i][1]
-		if r >= items[i].h or r < 0 or c >= items[i].w or c < 0:
-			continue # invalid
-		elif items[i].get_cell(r, c):
-			return i # match
+		var abs_offset:Vector2i = items[i].get_abs_offset(item_pos[i])
+		var max_item_row:int = items[i].h - 1 + abs_offset[0]
+		var max_item_col:int = items[i].w - 1 + abs_offset[1]
+		# check that the item contains the test location
+		if (max_item_row < inv_coords[0] or abs_offset[0] > inv_coords[0] 
+			or max_item_col < inv_coords[1] or abs_offset[1] > inv_coords[1]):
+			continue # test point not in range
+		elif items[i].get_cell(inv_coords[0] - abs_offset[0], inv_coords[1] - abs_offset[1]):
+			return i # match found
 	return -1 # didn't find a match
 
-func find_item_index(item:Item) -> int:
+func find_item_index(item:Item) -> Array[int]:
+	var all_matches:Array[int] = []
 	for i in len(items):
 		if items[i].equals(item):
-			return i
-	return -1 # did not find item
+			all_matches.append(i)
+	return all_matches # did not find item
 
+# item_index does not need to be for the item we want to add too,
+# any equal items will have the same stacking flags
 func __is_stacking_enabled(item_index:int) -> bool:
 	# check if the item_index is valid
 	if item_index == -1 or item_index > len(self.items):
@@ -79,6 +88,7 @@ func __is_stacking_enabled(item_index:int) -> bool:
 	# return if stacking is enabled
 	return self.inv_stacking and self.items[item_index].item_stacking
 
+# item_index must correspond to the item we whant to add too
 func __check_stacking_limit(item_index:int) -> bool:
 	# return if the new item stack is under the limit
 	var limit:int = mini(self.items[item_index].max_item_stack, self.max_inv_stack)
@@ -92,50 +102,55 @@ func check_stacking(item_index:int) -> bool:
 	return false
 
 # checks if item can be placed at offset, but does not place it
-func check(rel_offset:Vector2i, item:Item) -> bool:
+func check(rel_offset:Vector2i, item:Item) -> CHECK_STATUS:
 	item.trim_to_extent()
 	var abs_offset:Vector2i = item.get_abs_offset(rel_offset)
-	var item_index:int = self.find_item_index(item)
+	var item_indexes:Array[int] = self.find_item_index(item)
+	# find this item
+	#var item_index:int = 0
 	# check extent is within inventory
 	if abs_offset[0] + item.h > h or abs_offset[1] + item.w > w:
 		print("check fail::exceeds grid", abs_offset)
-		return false # extent passes end of inventory
+		return CHECK_STATUS.Fail_EX # extent passes end of inventory
 	if abs_offset[0] < 0 or abs_offset[1] < 0:
 		print("check fail::under grid")
-		return false # extent under min
+		return CHECK_STATUS.Fail_UN # extent under min
 	for row in item.h:
 		for col in item.w:
+			if not item.get_cell(row, col):
+				continue # only check cells that the item uses
 			# check if stacking is allowed
-			if __is_stacking_enabled(item_index):
+			if item_indexes and __is_stacking_enabled(item_indexes[0]):
 				# stacking is allowed
 				# only allow overlap with the same item type
-				var target_index:int = self.index_at_pos(row + abs_offset[0], col + abs_offset[1])
+				var target_index:int = self.index_at_pos(Vector2i(row + abs_offset[0], col + abs_offset[1]))
 				if target_index == -1:
 					# empty tile
 					pass # does not affect check result
-				elif (target_index == item_index and __check_stacking_limit(item_index)):
+				elif (target_index in item_indexes and __check_stacking_limit(target_index)):
 					# a same item overlap does not need to overlap perfectly
 					# new item will be placed at location of existing item
 					print("check pass::stacking")
-					return true # overlap and passed conditions
+					return CHECK_STATUS.Pass_ST # overlap and passed conditions
 				else:
 					print("check fail::conflict w/ stacking")
-					return false # at least one tile will conflict
+					last_conflict_pos = Vector2i(row + abs_offset[0], col + abs_offset[1])
+					return CHECK_STATUS.Fail_CNFL_ST # at least one tile will conflict
 			else:
 				# no stacking, just check if the tile is occupied
 				if self.get_cell(row + abs_offset[0], col + abs_offset[1]):
 					print("check fail::conflict")
-					return false # at least one tile will conflict
+					last_conflict_pos = Vector2i(row + abs_offset[0], col + abs_offset[1])
+					return CHECK_STATUS.Fail_CNFL # at least one tile will conflict
 	# all tiles checked, no conflicts found
 	print("check pass::no issues")
-	return true
+	return CHECK_STATUS.Pass
 
 # adds item to inventory -- does not check if it fits
-func __add_item(offset:Vector2i, item:Item) -> void:
-	var index:int = self.find_item_index(item)
-	if check_stacking(index):
+func __add_item(offset:Vector2i, item:Item, is_stacking:bool, stacking_index:int=0) -> void:
+	if is_stacking:
 		# add to existing index
-		self.item_count[index] += 1
+		self.item_count[stacking_index] += 1
 	else:
 		# new item
 		self.items.append(item)
@@ -144,9 +159,9 @@ func __add_item(offset:Vector2i, item:Item) -> void:
 		self.item_count.append(1)
 
 func remove_item(item:Item) -> void:
-	var index:int = self.find_item_index(item)
-	if index != -1:
-		self.remove_item_by_index(index)
+	var indexes:Array[int] = self.find_item_index(item)
+	if len(indexes) > 0:
+		self.remove_item_by_index(indexes[0])
 		
 func remove_item_by_offset(offset:Vector2i) -> void:
 	var index:int = -1
@@ -158,11 +173,12 @@ func remove_item_by_offset(offset:Vector2i) -> void:
 		self.remove_item_by_index(index)
 
 func remove_item_by_cell(row:int, col:int) -> void:
-	var index:int = self.index_at_pos(row, col)
+	var index:int = self.index_at_pos(Vector2i(row, col))
 	if index != -1:
 		self.remove_item_by_index(index)
 
 func remove_item_by_index(index:int) -> void:
+	print("remove item")
 	self.item_count[index] -= 1
 	if self.item_count[index] <= 0:
 		# clear fill
@@ -174,11 +190,18 @@ func remove_item_by_index(index:int) -> void:
 
 # adds item only if it can be placed
 func check_add(offset:Vector2i, item:Item) -> bool:
-	if check(offset, item):
-		self.__add_item(offset, item)
-		return true
-	return false
-	
+	var result:bool = false
+	match check(offset, item):
+		CHECK_STATUS.Pass_ST:
+			self.__add_item(offset, item, true, self.index_at_pos(last_conflict_pos))
+			result = true
+		CHECK_STATUS.Pass:
+			self.__add_item(offset, item, false)
+			result = true
+		_: # all fail conditions
+			result = false
+	return result
+
 func print_inventory() -> void:
 	print("::Fill::")
 	for i in h:
@@ -193,26 +216,3 @@ func print_inventory() -> void:
 	print("::Items::")
 	print(items)
 	print(item_count)
-	
-func _process(delta: float) -> void:
-	if debug:
-		# default
-		print("start config")
-		self.print_inventory()
-		print("add item")
-		var item1:Item = Item.new(4, 4)
-		item1.shape_str = "0011010101110100"
-		item1.init_shape()
-		item1.ID = "shape 1"
-		item1.print_shape()
-		var c:Array[bool] = []
-		c.append(self.check_add(Vector2i(0, -1), item1))
-		c.append(self.check_add(Vector2i(3, 4), item1.rotate_left()))
-		c.append(self.check_add(Vector2i(2, 2), item1.rotate_right()))
-		self.print_inventory()
-		#print("remove item")
-		#self.remove_item_by_offset(Vector2i(1, 1))
-		#self.remove_item_by_cell(2, 1)
-		#self.remove_item_by_cell(2, 1)
-		#self.print_inventory()
-		debug = false
