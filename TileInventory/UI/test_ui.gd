@@ -5,6 +5,7 @@ extends Control
 @onready var y_offset_input: SpinBox = $PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer/YOffsetInput
 @onready var items: Node = $Items
 @onready var item_option_button: OptionButton = $PanelContainer/HBoxContainer/Test_interface_container/OptionButton
+@onready var rotation_selection: OptionButton = $PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer/RotationSelection
 
 var item_options:Array[Item] = []
 var inventory:TileInventory
@@ -26,7 +27,20 @@ func _on_add_item_pressed() -> void:
 	var selected_id:int = item_option_button.get_selected_id()
 	if selected_id == -1:
 		selected_id = 0
-	inventory.check_add(Vector2i(x_offset_input.value, y_offset_input.value), item_options[selected_id])
+	var item:Item = item_options[selected_id]
+	match rotation_selection.get_selected_id():
+		1:
+			# left
+			item = item.rotate_left()
+		2:
+			# right
+			item = item.rotate_right()
+		3:
+			# down
+			item = item.rotate_left().rotate_left()
+		_:
+			pass
+	inventory.check_add(Vector2i(x_offset_input.value, y_offset_input.value), item)
 	tile_inventory_ui.update_highlight(Vector2i(x_offset_input.value, y_offset_input.value))
 
 func _on_remove_item_pressed() -> void:
