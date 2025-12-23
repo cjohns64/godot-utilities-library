@@ -1,12 +1,13 @@
 extends Control
 
 @onready var tile_inventory_ui: Control = $PanelContainer/HBoxContainer/TileInventory_UI
-@onready var x_offset_input: SpinBox = $PanelContainer/HBoxContainer/Test_interface_container/XOffsetContainer/XOffsetInput
-@onready var y_offset_input: SpinBox = $PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer/YOffsetInput
 @onready var items: Node = $Items
 @onready var item_option_button: OptionButton = $PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer2/OptionButton
 @onready var rotation_selection: OptionButton = $PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer/RotationSelection
+@onready var move_mode_button: CheckButton = $PanelContainer/HBoxContainer/Test_interface_container/MoveModeButton
 
+var active_cell:Vector2i = Vector2i.ZERO
+var from_cell:Vector2i = Vector2i.ZERO
 var item_options:Array[Item] = []
 var inventory:TileInventory
 var do_once:bool = true
@@ -39,33 +40,31 @@ func add_item(loc:Vector2i) -> void:
 		_:
 			pass
 	inventory.check_add(loc, item)
-	tile_inventory_ui.update_highlight(loc)
+	tile_inventory_ui.update_highlight(from_cell)
 
 func remove_item(loc:Vector2i) -> void:
 	inventory.remove_item_by_cell(loc[0], loc[1])
-	tile_inventory_ui.update_highlight(loc)
+	tile_inventory_ui.update_highlight(from_cell)
 
 func _on_button_pressed() -> void:
-	@warning_ignore("narrowing_conversion")
-	tile_inventory_ui.update_highlight(Vector2i(x_offset_input.value, y_offset_input.value))
-
-func _on_add_item_pressed() -> void:
-	@warning_ignore("narrowing_conversion")
-	add_item(Vector2i(x_offset_input.value, y_offset_input.value))
-
-func _on_remove_item_pressed() -> void:
-	@warning_ignore("narrowing_conversion")
-	remove_item(Vector2i(x_offset_input.value, y_offset_input.value))
-
-func _on_offset_input_value_changed(value: float) -> void:
-	@warning_ignore("narrowing_conversion")
-	tile_inventory_ui.update_highlight(Vector2i(x_offset_input.value, y_offset_input.value))
+	tile_inventory_ui.update_highlight(from_cell)
 
 func _on_tile_inventory_ui_click_event(location: Vector2i, is_left: bool) -> void:
-	if is_left:
-		add_item(location)
+	if move_mode_button.is_pressed():
+		# move mode
+		if is_left:
+			active_cell = location
+			inventory.try_move(from_cell, active_cell)
+			tile_inventory_ui.update_highlight(from_cell)
+		else:
+			from_cell = location
+			tile_inventory_ui.update_highlight(from_cell)
 	else:
-		remove_item(location)
+		active_cell = location
+		if is_left:
+			add_item(location)
+		else:
+			remove_item(location)
 
 func looping_range(value:int, max_value:int, d:int) -> int:
 	var tmp:int = value + d
@@ -77,8 +76,8 @@ func looping_range(value:int, max_value:int, d:int) -> int:
 
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("Rotation Up"):
-		print("rotaion select ++")
+		print("rotation select ++")
 		rotation_selection.select(looping_range(rotation_selection.selected, rotation_selection.item_count, 1))
 	if Input.is_action_just_pressed("Rotation Down"):
-		print("rotaion select --")
+		print("rotation select --")
 		rotation_selection.select(looping_range(rotation_selection.selected, rotation_selection.item_count, -1))

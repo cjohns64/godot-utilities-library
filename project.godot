@@ -22,7 +22,7 @@ SignalBus="*res://Globals/SignalBus.gd"
 [display]
 
 window/size/viewport_width=1080
-window/size/viewport_height=460
+window/size/viewport_height=440
 
 [editor]
 

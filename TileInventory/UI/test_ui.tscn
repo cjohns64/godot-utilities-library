@@ -36,37 +36,9 @@ size_flags_stretch_ratio = 0.25
 layout_mode = 2
 text = "Update"
 
-[node name="Add Item" type="Button" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+[node name="MoveModeButton" type="CheckButton" parent="PanelContainer/HBoxContainer/Test_interface_container"]
 layout_mode = 2
-text = "Add Item"
-
-[node name="Remove Item" type="Button" parent="PanelContainer/HBoxContainer/Test_interface_container"]
-layout_mode = 2
-text = "Remove Item"
-
-[node name="XOffsetContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/Test_interface_container/XOffsetContainer"]
-layout_mode = 2
-text = "Row Offset:"
-
-[node name="XOffsetInput" type="SpinBox" parent="PanelContainer/HBoxContainer/Test_interface_container/XOffsetContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-rounded = true
-
-[node name="YOffsetContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer"]
-layout_mode = 2
-text = "Col Offset:"
-
-[node name="YOffsetInput" type="SpinBox" parent="PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-rounded = true
+text = "Move Mode"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
 layout_mode = 2
@@ -89,9 +61,6 @@ popup/item_2/text = "Right"
 popup/item_2/id = 2
 popup/item_3/text = "Down"
 popup/item_3/id = 3
-
-[node name="HSeparator" type="HSeparator" parent="PanelContainer/HBoxContainer/Test_interface_container"]
-layout_mode = 2
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
 layout_mode = 2
@@ -161,8 +130,4 @@ shape_str = "1001100110011111"
 metadata/_custom_type_script = "uid://h6qwubrbv1qc"
 
 [connection signal="pressed" from="PanelContainer/HBoxContainer/Test_interface_container/Update" to="." method="_on_button_pressed"]
-[connection signal="pressed" from="PanelContainer/HBoxContainer/Test_interface_container/Add Item" to="." method="_on_add_item_pressed"]
-[connection signal="pressed" from="PanelContainer/HBoxContainer/Test_interface_container/Remove Item" to="." method="_on_remove_item_pressed"]
-[connection signal="value_changed" from="PanelContainer/HBoxContainer/Test_interface_container/XOffsetContainer/XOffsetInput" to="." method="_on_offset_input_value_changed"]
-[connection signal="value_changed" from="PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer/YOffsetInput" to="." method="_on_offset_input_value_changed"]
 [connection signal="click_event" from="PanelContainer/HBoxContainer/TileInventory_UI" to="." method="_on_tile_inventory_ui_click_event"]

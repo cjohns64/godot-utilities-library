@@ -57,21 +57,6 @@ func _ready():
 	self.init_shape()
 	self.print_shape()
 
-@warning_ignore("unused_parameter")
-func _process(delta: float) -> void:
-	if debug:
-		#print("item base")
-		#self.print_shape()
-		#print("transpose")
-		#self.transpose().print_shape()
-		#print("rotate left")
-		#self.rotate_left().print_shape()
-		#print("rotate right")
-		#self.rotate_right().print_shape()
-		#print("Extent")
-		#print(self.find_extent())
-		debug = false
-
 func __transpose() -> Item:
 	var new_item = Item.new(w, h) # reversed width and height
 	new_item.ID = self.ID # maintain ID

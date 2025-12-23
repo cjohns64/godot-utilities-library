@@ -4,7 +4,6 @@ extends Control
 @export var inventory:TileInventory
 @export_group("UI Data")
 @onready var grid_container: GridContainer = $PanelContainer/GridContainer
-
 @export var tile_res:PackedScene = preload("res://TileInventory/UI/tile_ui.tscn")
 var tile_size:float = 40
 var ui_cells:Array[Control] = []

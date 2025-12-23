@@ -88,7 +88,7 @@ func __is_stacking_enabled(item_index:int) -> bool:
 	# return if stacking is enabled
 	return self.inv_stacking and self.items[item_index].item_stacking
 
-# item_index must correspond to the item we whant to add too
+# item_index must correspond to the item we want to add too
 func __check_stacking_limit(item_index:int) -> bool:
 	# return if the new item stack is under the limit
 	var limit:int = mini(self.items[item_index].max_item_stack, self.max_inv_stack)
@@ -217,6 +217,23 @@ func check_add(offset:Vector2i, item:Item) -> bool:
 		_: # all fail conditions
 			result = false
 	return result
+
+func try_move(from:Vector2i, to:Vector2i) -> bool:
+	# get item at from location
+	var index:int = self.index_at_pos(from)
+	if index == -1:
+		return false # failed to find from item
+	var from_item:Item = self.items[index]
+	var from_item_offset:Vector2i = self.item_pos[index]
+	self.remove_item_by_index(index)
+	if self.check_add(to, from_item):
+		return true # item moved successfully
+	# move back to starting location
+	if self.check_add(from_item_offset, from_item):
+		return false # failed to move item to destination
+	else:
+		assert(false) # item disappeared!
+		return false 
 
 func print_inventory() -> void:
 	print("::Fill::")
