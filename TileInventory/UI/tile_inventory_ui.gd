@@ -4,7 +4,9 @@ extends Control
 @export var inventory:TileInventory
 @export_group("UI Data")
 @onready var grid_container: GridContainer = $PanelContainer/GridContainer
+
 @export var tile_res:PackedScene = preload("res://TileInventory/UI/tile_ui.tscn")
+var tile_size:float = 40
 var ui_cells:Array[Control] = []
 @export var empty_color:Color
 @export var filled_color:Color
@@ -12,6 +14,7 @@ signal click_event(location:Vector2i, is_left:bool)
 
 func set_tile_size() -> void:
 	grid_container.set_columns(inventory.w)
+	grid_container.set_custom_minimum_size(Vector2(inventory.w * tile_size, inventory.h * tile_size))
 	print("ui column update (set, current) ", inventory.w, " ", grid_container.get_columns())
 	ui_cells = []
 	ui_cells.resize(inventory.w * inventory.h)
