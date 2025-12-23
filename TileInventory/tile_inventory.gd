@@ -115,33 +115,49 @@ func check(rel_offset:Vector2i, item:Item) -> CHECK_STATUS:
 	if abs_offset[0] < 0 or abs_offset[1] < 0:
 		print("check fail::under grid")
 		return CHECK_STATUS.Fail_UN # extent under min
-	for row in item.h:
-		for col in item.w:
-			if not item.get_cell(row, col):
-				continue # only check cells that the item uses
-			# check if stacking is allowed
-			if item_indexes and __is_stacking_enabled(item_indexes[0]):
-				# stacking is allowed
-				# only allow overlap with the same item type
-				var target_index:int = self.index_at_pos(Vector2i(row + abs_offset[0], col + abs_offset[1]))
-				if target_index == -1:
-					# empty tile
-					pass # does not affect check result
-				elif (target_index in item_indexes and __check_stacking_limit(target_index)):
-					# a same item overlap does not need to overlap perfectly
-					# new item will be placed at location of existing item
-					print("check pass::stacking")
-					return CHECK_STATUS.Pass_ST # overlap and passed conditions
-				else:
-					print("check fail::conflict w/ stacking")
-					last_conflict_pos = Vector2i(row + abs_offset[0], col + abs_offset[1])
-					return CHECK_STATUS.Fail_CNFL_ST # at least one tile will conflict
+	
+	# sort cell indexes by their distance from the item origin
+	var o = range(0, item.h*item.w)
+	var sort_lambda = func(a:int, b:int) -> bool:
+		@warning_ignore("integer_division")
+		var d1:int = abs((a / item.w) - item.origin[0]) + abs((a % item.w) - item.origin[1])
+		@warning_ignore("integer_division")
+		var d2:int = abs((b / item.w) - item.origin[0]) + abs((b % item.w) - item.origin[1])
+		return d1 < d2
+	o.sort_custom(sort_lambda)
+	#print("custom order: ", o, " normal: ", range(item.h*item.w))
+	
+	for i in o:
+		var row:int = i / item.w
+		var col:int = i % item.w
+		if not item.get_cell(row, col):
+			continue # only check cells that the item uses
+		print("checking cell ", row, " col ", col)
+		# check if stacking is allowed
+		if item_indexes and __is_stacking_enabled(item_indexes[0]):
+			# stacking is allowed
+			# only allow overlap with the same item type
+			var target_index:int = self.index_at_pos(Vector2i(row + abs_offset[0], col + abs_offset[1]))
+			print("target pos: ", Vector2i(row + abs_offset[0], col + abs_offset[1]))
+			if target_index == -1:
+				# empty tile
+				pass # does not affect check result
+			elif (target_index in item_indexes and __check_stacking_limit(target_index)):
+				# a same item overlap does not need to overlap perfectly
+				# new item will be placed at location of existing item
+				print("check pass::stacking")
+				last_conflict_pos = Vector2i(row + abs_offset[0], col + abs_offset[1])
+				return CHECK_STATUS.Pass_ST # overlap and passed conditions
 			else:
-				# no stacking, just check if the tile is occupied
-				if self.get_cell(row + abs_offset[0], col + abs_offset[1]):
-					print("check fail::conflict")
-					last_conflict_pos = Vector2i(row + abs_offset[0], col + abs_offset[1])
-					return CHECK_STATUS.Fail_CNFL # at least one tile will conflict
+				print("check fail::conflict w/ stacking")
+				last_conflict_pos = Vector2i(row + abs_offset[0], col + abs_offset[1])
+				return CHECK_STATUS.Fail_CNFL_ST # at least one tile will conflict
+		else:
+			# no stacking, just check if the tile is occupied
+			if self.get_cell(row + abs_offset[0], col + abs_offset[1]):
+				print("check fail::conflict")
+				last_conflict_pos = Vector2i(row + abs_offset[0], col + abs_offset[1])
+				return CHECK_STATUS.Fail_CNFL # at least one tile will conflict
 	# all tiles checked, no conflicts found
 	print("check pass::no issues")
 	return CHECK_STATUS.Pass

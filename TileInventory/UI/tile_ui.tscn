@@ -1,6 +1,31 @@
-[gd_scene load_steps=2 format=3 uid="uid://bmojfcmdexrxu"]
+[gd_scene load_steps=5 format=3 uid="uid://bmojfcmdexrxu"]
 
 [ext_resource type="Script" uid="uid://cvagofb2cyyys" path="res://TileInventory/UI/tile_ui.gd" id="1_hhpdv"]
+[ext_resource type="StyleBox" uid="uid://btfn563g5iv1" path="res://TileInventory/styles/new_style_box_flat.tres" id="2_ogfn2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hhpdv"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ogfn2"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
 
 [node name="Tile" type="Control"]
 layout_mode = 3
@@ -26,7 +51,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TileColor" type="ColorRect" parent="AspectRatioContainer"]
-custom_minimum_size = Vector2(25, 25)
+custom_minimum_size = Vector2(35, 35)
 layout_mode = 2
 color = Color(0.29988128, 0.37944594, 0.71328676, 1)
 
@@ -36,3 +61,29 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 color = Color(1, 0, 0, 1)
+
+[node name="RemoveButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme_override_styles/normal = SubResource("StyleBoxFlat_hhpdv")
+theme_override_styles/hover = ExtResource("2_ogfn2")
+button_mask = 2
+
+[node name="AddButton" type="Button" parent="RemoveButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme_override_styles/normal = SubResource("StyleBoxFlat_ogfn2")
+theme_override_styles/hover = ExtResource("2_ogfn2")
+
+[connection signal="pressed" from="RemoveButton" to="." method="_on_remove_button_pressed"]
+[connection signal="pressed" from="RemoveButton/AddButton" to="." method="_on_add_button_pressed"]

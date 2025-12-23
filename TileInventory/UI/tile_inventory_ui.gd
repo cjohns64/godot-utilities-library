@@ -8,7 +8,7 @@ extends Control
 var ui_cells:Array[Control] = []
 @export var empty_color:Color
 @export var filled_color:Color
-
+signal click_event(location:Vector2i, is_left:bool)
 
 func set_tile_size() -> void:
 	grid_container.set_columns(inventory.w)
@@ -18,6 +18,8 @@ func set_tile_size() -> void:
 	for i in inventory.w * inventory.h:
 		var tmp:Control = tile_res.instantiate()
 		ui_cells[i] = tmp
+		tmp.index = i
+		tmp.on_button_pressed.connect(on_click_event)
 		grid_container.add_child(tmp)
 
 func update_highlight(selected:Vector2i) -> void:
@@ -28,5 +30,9 @@ func update_highlight(selected:Vector2i) -> void:
 				ui_cells[row*inventory.w + col].set_status(filled_color, is_selected)
 			else:
 				ui_cells[row*inventory.w + col].set_status(empty_color, is_selected)
-			
-			
+
+func on_click_event(index:int, is_left:bool) -> void:
+	var col:int = index % inventory.w
+	var row:int = index / inventory.w
+	print("click event at ", row, " ", col, " ", is_left)
+	click_event.emit(Vector2i(row, col), is_left)

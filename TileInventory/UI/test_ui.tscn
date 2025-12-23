@@ -93,8 +93,16 @@ popup/item_3/id = 3
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/HBoxContainer/Test_interface_container"]
 layout_mode = 2
 
-[node name="OptionButton" type="OptionButton" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
 layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer2"]
+layout_mode = 2
+text = "Shape "
+
+[node name="OptionButton" type="OptionButton" parent="PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
 allow_reselect = true
 item_count = 1
 popup/item_0/text = "Test"
@@ -157,3 +165,4 @@ metadata/_custom_type_script = "uid://h6qwubrbv1qc"
 [connection signal="pressed" from="PanelContainer/HBoxContainer/Test_interface_container/Remove Item" to="." method="_on_remove_item_pressed"]
 [connection signal="value_changed" from="PanelContainer/HBoxContainer/Test_interface_container/XOffsetContainer/XOffsetInput" to="." method="_on_offset_input_value_changed"]
 [connection signal="value_changed" from="PanelContainer/HBoxContainer/Test_interface_container/YOffsetContainer/YOffsetInput" to="." method="_on_offset_input_value_changed"]
+[connection signal="click_event" from="PanelContainer/HBoxContainer/TileInventory_UI" to="." method="_on_tile_inventory_ui_click_event"]
