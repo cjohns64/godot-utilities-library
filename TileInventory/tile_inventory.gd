@@ -219,21 +219,35 @@ func check_add(offset:Vector2i, item:Item) -> bool:
 	return result
 
 func try_move(from:Vector2i, to:Vector2i) -> bool:
+	return try_move_and_rotate(from, to, 0)
+
+func try_move_and_rotate(from:Vector2i, to:Vector2i, left_rotations:int) -> bool:
 	# get item at from location
 	var index:int = self.index_at_pos(from)
 	if index == -1:
 		return false # failed to find from item
+	# cache item
 	var from_item:Item = self.items[index]
 	var from_item_offset:Vector2i = self.item_pos[index]
+	# remove from inventory
 	self.remove_item_by_index(index)
-	if self.check_add(to, from_item):
+	# rotate
+	var rotated_item:Item = from_item
+	if left_rotations % 4 > 0:
+		for r in left_rotations % 4:
+			rotated_item = rotated_item.rotate_left()
+	elif left_rotations % 4 < 0:
+		for r in absi(left_rotations % 4):
+			rotated_item = rotated_item.rotate_right()
+	# add to new location
+	if self.check_add(to, rotated_item):
 		return true # item moved successfully
-	# move back to starting location
+	# move back to starting location with original rotation
 	if self.check_add(from_item_offset, from_item):
 		return false # failed to move item to destination
 	else:
 		assert(false) # item disappeared!
-		return false 
+		return false
 
 func print_inventory() -> void:
 	print("::Fill::")

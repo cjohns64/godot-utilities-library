@@ -27,27 +27,41 @@ offset_bottom = -10.0
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
 layout_mode = 2
 
-[node name="Test_interface_container" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
+[node name="TestInterface" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.25
 
-[node name="Update" type="Button" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+[node name="Update" type="Button" parent="PanelContainer/HBoxContainer/TestInterface"]
 layout_mode = 2
 text = "Update"
 
-[node name="MoveModeButton" type="CheckButton" parent="PanelContainer/HBoxContainer/Test_interface_container"]
-layout_mode = 2
-text = "Move Mode"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+[node name="ModeContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/TestInterface"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer"]
+[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/TestInterface/ModeContainer"]
 layout_mode = 2
-text = "Rotation"
+text = "Mode: "
 
-[node name="RotationSelection" type="OptionButton" parent="PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer"]
+[node name="Mode" type="OptionButton" parent="PanelContainer/HBoxContainer/TestInterface/ModeContainer"]
+layout_mode = 2
+selected = 1
+item_count = 3
+popup/item_0/text = "Add/Remove"
+popup/item_0/id = 0
+popup/item_1/text = "Move"
+popup/item_1/id = 1
+popup/item_2/text = "Rotate"
+popup/item_2/id = 2
+
+[node name="RotationContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/TestInterface"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/TestInterface/RotationContainer"]
+layout_mode = 2
+text = "Rotation: "
+
+[node name="RotationSelection" type="OptionButton" parent="PanelContainer/HBoxContainer/TestInterface/RotationContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 0
@@ -62,14 +76,14 @@ popup/item_2/id = 2
 popup/item_3/text = "Down"
 popup/item_3/id = 3
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/HBoxContainer/Test_interface_container"]
+[node name="ShapeContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/TestInterface"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer2"]
+[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/TestInterface/ShapeContainer"]
 layout_mode = 2
-text = "Shape "
+text = "Shape: "
 
-[node name="OptionButton" type="OptionButton" parent="PanelContainer/HBoxContainer/Test_interface_container/HBoxContainer2"]
+[node name="ShapeOptions" type="OptionButton" parent="PanelContainer/HBoxContainer/TestInterface/ShapeContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 allow_reselect = true
@@ -129,5 +143,5 @@ max_item_stack = 4
 shape_str = "1001100110011111"
 metadata/_custom_type_script = "uid://h6qwubrbv1qc"
 
-[connection signal="pressed" from="PanelContainer/HBoxContainer/Test_interface_container/Update" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="PanelContainer/HBoxContainer/TestInterface/Update" to="." method="_on_button_pressed"]
 [connection signal="click_event" from="PanelContainer/HBoxContainer/TileInventory_UI" to="." method="_on_tile_inventory_ui_click_event"]
