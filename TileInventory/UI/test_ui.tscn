@@ -36,6 +36,11 @@ size_flags_stretch_ratio = 0.25
 layout_mode = 2
 text = "Update"
 
+[node name="Sort" type="Button" parent="PanelContainer/HBoxContainer/TestInterface"]
+layout_mode = 2
+text = "Sort
+"
+
 [node name="ModeContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/TestInterface"]
 layout_mode = 2
 
@@ -45,7 +50,7 @@ text = "Mode: "
 
 [node name="Mode" type="OptionButton" parent="PanelContainer/HBoxContainer/TestInterface/ModeContainer"]
 layout_mode = 2
-selected = 1
+selected = 0
 item_count = 3
 popup/item_0/text = "Add/Remove"
 popup/item_0/id = 0
@@ -144,4 +149,5 @@ shape_str = "1001100110011111"
 metadata/_custom_type_script = "uid://h6qwubrbv1qc"
 
 [connection signal="pressed" from="PanelContainer/HBoxContainer/TestInterface/Update" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="PanelContainer/HBoxContainer/TestInterface/Sort" to="." method="_on_sort_pressed"]
 [connection signal="click_event" from="PanelContainer/HBoxContainer/TileInventory_UI" to="." method="_on_tile_inventory_ui_click_event"]

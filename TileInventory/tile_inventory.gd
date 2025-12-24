@@ -263,3 +263,140 @@ func print_inventory() -> void:
 	print("::Items::")
 	print(items)
 	print(item_count)
+
+func sort() -> void:
+	print("::Sort Start::")
+	print("Items: ", self.items)
+	print("Count: ", self.item_count)
+	# stack all duplicate items up to limits
+	var count:Array[int] = []
+	var nodup_items:Array[Item] = []
+	
+	# sum all like items into one list entry
+	for x in len(items):
+		var found:bool = false
+		for i in len(nodup_items):
+			if items[x].equals(nodup_items[i]):
+				count[i] += item_count[x]
+				found = true
+				break
+		if not found:
+			nodup_items.append(items[x])
+			count.append(item_count[x])
+	# split item entries that exceed their stacking limit
+	var min_items:Array[Item] = []
+	var min_count:Array[int] = []
+	for i in len(nodup_items):
+		var limit:int = mini(nodup_items[i].max_item_stack, self.max_inv_stack)
+		@warning_ignore("integer_division")
+		var sections = count[i] / limit
+		if count[i] % limit != 0:
+			sections += 1 # add one pass for remainder
+		for j in sections:
+			var c:int = limit
+			if (j + 1) * limit > count[i]:
+				c = count[i] % limit # append remainder
+			min_items.append(nodup_items[i])
+			min_count.append(c)
+	print("||Sort Finished||")
+	print("Items: ", min_items)
+	print("Count: ", min_count)
+	# clear inventory
+	self.__clear_inventory()
+	
+	# maximize upper left, minimize gaps
+	# for each item stack at a time,
+	# check all placement options, 
+	# only add to solution list if it has a lower score then the previous best
+	# repeat until all stacks have been placed
+	var stack_offset:Array[Vector2i] = []
+	for x in len(min_items):
+		var min_score:int = 9223372036854775807 # int max value
+		var solution_list:Array[Vector2i] = []
+		for i in w * h:
+			for rotation in 4:
+				# rotate item
+				var rot_item:Item = __rotate_item(rotation, min_items[x])
+				@warning_ignore("integer_division")
+				var loc:Vector2i = Vector2i(i/w, i%w)
+				# check if item can be placed
+				if not __check_stack(loc, rot_item):
+					continue # skip to next test
+				# place item and score
+				var abs_loc:Vector2i = rot_item.get_abs_offset(loc)
+				__add_or_remove_to_fill(abs_loc, rot_item, true)
+				@warning_ignore("integer_division")
+				var score:int = __score_gaps() + i/w + i%w
+				# remove item
+				__add_or_remove_to_fill(abs_loc, rot_item, false)
+				if score < min_score:
+					# add to solution
+					min_score = score
+					solution_list.append(Vector2i(i, rotation))
+		assert(len(solution_list) > 0) # failed to find a solution
+		# set best result to board, lock in to solution
+		var index:int = solution_list[-1][0]
+		@warning_ignore("integer_division")
+		var sol_loc:Vector2i = Vector2i(index / w, index % w)
+		stack_offset.append(sol_loc)
+		var sol_item:Item = __rotate_item(solution_list[-1][1], min_items[x])
+		__add_or_remove_to_fill(sol_item.get_abs_offset(sol_loc), sol_item, true)
+	self.items = min_items
+	self.item_count = min_count
+	self.item_pos = stack_offset
+	
+func __rotate_item(rotation:int, item:Item) -> Item:
+	match rotation:
+		1: # left one
+			return item.rotate_left()
+		2: # right one
+			return item.rotate_right()
+		3: # left two
+			return item.rotate_left().rotate_left()
+		_: # no rotation
+			return item
+
+func __clear_inventory() -> void:
+	for i in w * h:
+		fill_tiles[i] = false
+	self.items = []
+	self.item_count = []
+	self.item_pos = []
+
+# paired down version of check, that ignores stacking.
+# items in the sort are already at their stacking limit
+func __check_stack(rel_offset:Vector2i, item:Item) -> bool:
+	var abs_offset:Vector2i = item.get_abs_offset(rel_offset)
+	# check extent is within inventory
+	if abs_offset[0] + item.h > h or abs_offset[1] + item.w > w:
+		return false # extent passes end of inventory
+	if abs_offset[0] < 0 or abs_offset[1] < 0:
+		return false # extent under min
+	# check all the cells
+	for i in item.h*item.w:
+		@warning_ignore("integer_division")
+		var row:int = i / item.w
+		var col:int = i % item.w
+		if not item.get_cell(row, col):
+			continue # only check cells that the item uses
+		# check if the tile is occupied
+		if self.get_cell(row + abs_offset[0], col + abs_offset[1]):
+			return false # at least one tile will conflict
+	# all tiles checked, no conflicts found
+	return true
+
+func __score_gaps() -> int:
+	# O(n) way to score the gaps in the inventory
+	# ignores vertical gaps, scores smaller gaps as worse
+	var t:int = 0 # total score
+	var r:int = 0 # run score increment
+	for i in w * h:
+		if self.fill_tiles[i]:
+			r -= 5 # reset the run increment
+		else:
+			r += 1
+			@warning_ignore("integer_division")
+			if i == 0 or i == h - 1 or i / w == 0 or i / w == h - 1:
+				r += 2 # extra cost on edges
+			t += r
+	return t

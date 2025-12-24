@@ -93,3 +93,7 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("Rotation Down"):
 		print("rotation select --")
 		rotation_selection.select(looping_range(rotation_selection.selected, rotation_selection.item_count, -1))
+
+func _on_sort_pressed() -> void:
+	inventory.sort()
+	tile_inventory_ui.update_highlight(from_cell)
