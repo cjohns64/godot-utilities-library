@@ -72,9 +72,9 @@ func _on_tile_inventory_ui_click_event(location: Vector2i, is_left: bool) -> voi
 			# rotate about item origin
 			var item_loc:Vector2i = inventory.item_pos[index]
 			if is_left:
-				inventory.try_move_and_rotate(active_cell, item_loc, 1)
+				inventory.try_move_and_rotate(active_cell, item_loc, 1, true)
 			else:
-				inventory.try_move_and_rotate(active_cell, item_loc, -1)
+				inventory.try_move_and_rotate(active_cell, item_loc, -1, true)
 			tile_inventory_ui.update_highlight(item_loc)
 
 

@@ -16,6 +16,11 @@ var debug:bool = true
 func equals(item:Item) -> bool:
 	return item.ID == self.ID
 
+func _copy_metadata(item:Item) -> void:
+	self.ID = item.ID
+	self.max_item_stack = item.max_item_stack
+	self.item_stacking = item.item_stacking
+
 func _to_string() -> String:
 	return self.ID
 
@@ -59,7 +64,7 @@ func _ready():
 
 func __transpose() -> Item:
 	var new_item = Item.new(w, h) # reversed width and height
-	new_item.ID = self.ID # maintain ID
+	new_item._copy_metadata(self)
 	for row in h:
 		for col in w:
 			new_item.set_cell(col, row, self.get_cell(row, col))
@@ -67,7 +72,6 @@ func __transpose() -> Item:
 
 func rotate_left() -> Item:
 	var new_item = self.__transpose()
-	new_item.ID = self.ID # maintain ID
 	# reverse each col
 	for row in int(new_item.h / 2):
 		for col in new_item.w:
@@ -79,7 +83,6 @@ func rotate_left() -> Item:
 	
 func rotate_right() -> Item:
 	var new_item = self.__transpose()
-	new_item.ID = self.ID # maintain ID
 	# reverse each row
 	for row in new_item.h:
 		for col in int(new_item.w / 2):
