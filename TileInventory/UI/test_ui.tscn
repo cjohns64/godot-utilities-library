@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://5grm6cw632bf" path="res://TileInventory/UI/test_ui.gd" id="1_73ub3"]
 [ext_resource type="PackedScene" uid="uid://bhpyh13bdip01" path="res://TileInventory/UI/tile_inventory_ui.tscn" id="1_d305y"]
 [ext_resource type="Script" uid="uid://cmi4lvx0gugcv" path="res://TileInventory/tile_inventory.gd" id="2_vegq2"]
-[ext_resource type="Script" uid="uid://h6qwubrbv1qc" path="res://TileInventory/item.gd" id="4_qmr6s"]
+[ext_resource type="PackedScene" uid="uid://xexgivj5yp3t" path="res://TileInventory/item.tscn" id="4_qmr6s"]
 
 [node name="TestUI" type="Control"]
 layout_mode = 3
@@ -113,40 +113,30 @@ metadata/_custom_type_script = "uid://cmi4lvx0gugcv"
 
 [node name="Items" type="Node" parent="."]
 
-[node name="Plus" type="Node" parent="Items"]
-script = ExtResource("4_qmr6s")
+[node name="shape 1" parent="Items" instance=ExtResource("4_qmr6s")]
+ID = "item 1"
+shape_str = "0101101011110100"
+
+[node name="shape 2" parent="Items" instance=ExtResource("4_qmr6s")]
 h = 3
 w = 3
-ID = "Plus"
-shape_str = "010111010"
-metadata/_custom_type_script = "uid://h6qwubrbv1qc"
+ID = "item 2"
+max_item_stack = 5
+shape_str = "111010101"
 
-[node name="X" type="Node" parent="Items"]
-script = ExtResource("4_qmr6s")
-h = 3
-w = 3
-ID = "X"
-max_item_stack = 6
-shape_str = "101010101"
-metadata/_custom_type_script = "uid://h6qwubrbv1qc"
+[node name="shape 3" parent="Items" instance=ExtResource("4_qmr6s")]
+h = 5
+w = 5
+ID = "item 3"
+max_item_stack = 2
+shape_str = "1101101110001000101011001"
 
-[node name="U" type="Node" parent="Items"]
-script = ExtResource("4_qmr6s")
-h = 3
-w = 3
-ID = "U"
-max_item_stack = 4
-shape_str = "101101111"
-metadata/_custom_type_script = "uid://h6qwubrbv1qc"
-
-[node name="LargeU" type="Node" parent="Items"]
-script = ExtResource("4_qmr6s")
-h = 4
-w = 4
-ID = "Large U"
-max_item_stack = 4
-shape_str = "1001100110011111"
-metadata/_custom_type_script = "uid://h6qwubrbv1qc"
+[node name="shape 4" parent="Items" instance=ExtResource("4_qmr6s")]
+h = 5
+w = 2
+ID = "item 4"
+max_item_stack = 2
+shape_str = "0101101011"
 
 [connection signal="pressed" from="PanelContainer/HBoxContainer/TestInterface/Update" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="PanelContainer/HBoxContainer/TestInterface/Sort" to="." method="_on_sort_pressed"]

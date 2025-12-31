@@ -37,7 +37,7 @@ func add_item(loc:Vector2i) -> void:
 		3:
 			# down
 			item = item.rotate_left().rotate_left()
-		_:
+		_: # no rotation
 			pass
 	inventory.check_add(loc, item)
 	tile_inventory_ui.update_highlight(from_cell)

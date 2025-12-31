@@ -9,9 +9,12 @@ class_name Item extends Node
 @export var shape_str:String
 # matrix representing the shape of the item
 var shape:Array[bool] = []
+var rotation:float = 0
 var debug:bool = true
 @warning_ignore("integer_division")
-@onready var origin:Vector2i = Vector2i(h/2, w/2)
+@onready var cell_origin:Vector2i = Vector2i(h/2, w/2)
+@onready var true_origin:Vector2 = Vector2(float(h)/2.0, float(w)/2.0)
+@onready var icon: TextureRect = $Icon
 
 func equals(item:Item) -> bool:
 	return item.ID == self.ID
@@ -20,6 +23,8 @@ func _copy_metadata(item:Item) -> void:
 	self.ID = item.ID
 	self.max_item_stack = item.max_item_stack
 	self.item_stacking = item.item_stacking
+	self.icon = item.icon
+	self.rotation = item.rotation
 
 func _to_string() -> String:
 	return self.ID
@@ -36,7 +41,8 @@ func set_shape(_shape:Array[bool]) -> void:
 
 func recalculate_origin() -> void:
 	@warning_ignore("integer_division")
-	origin = Vector2i((h-1)/2, (w-1)/2)
+	cell_origin = Vector2i((h-1)/2, (w-1)/2)
+	true_origin = Vector2(float(h)/2.0, float(w)/2.0)
 
 func init_shape() -> void:
 	# setup item shape matrix
@@ -56,7 +62,7 @@ func set_cell(row:int, col:int, data:bool) -> void:
 	shape[row*w + col] = data
 
 func get_abs_offset(rel_offset:Vector2i) -> Vector2i:
-	return Vector2i(rel_offset[0] - origin[0], rel_offset[1] - origin[1])
+	return Vector2i(rel_offset[0] - cell_origin[0], rel_offset[1] - cell_origin[1])
 
 func _ready():
 	self.init_shape()
@@ -72,6 +78,7 @@ func __transpose() -> Item:
 
 func rotate_left() -> Item:
 	var new_item = self.__transpose()
+	new_item.rotation = fmod(self.rotation - 90, 360)
 	# reverse each col
 	for row in int(new_item.h / 2):
 		for col in new_item.w:
@@ -83,6 +90,7 @@ func rotate_left() -> Item:
 	
 func rotate_right() -> Item:
 	var new_item = self.__transpose()
+	new_item.rotation = fmod(self.rotation + 90, 360)
 	# reverse each row
 	for row in new_item.h:
 		for col in int(new_item.w / 2):
@@ -133,7 +141,7 @@ func trim_to_extent() -> void:
 	self.print_shape()
 
 func print_shape() -> void:
-	print(origin)
+	print("cell origin: ", cell_origin, " true origin: ", true_origin)
 	for i in h:
 		var row:String = ""
 		for j in w:

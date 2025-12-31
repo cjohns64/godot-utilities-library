@@ -43,6 +43,10 @@ func init_fill() -> void:
 	for i in (h * w):
 		fill_tiles.append(false)
 
+func get_coords(index:int) -> Vector2i:
+	@warning_ignore("integer_division")
+	return Vector2i(index / w, index % w)
+
 func get_cell(row:int, col:int) -> bool:
 	return fill_tiles[row*w + col]
 
@@ -120,9 +124,9 @@ func check(rel_offset:Vector2i, item:Item, stack_amount:int=1) -> CHECK_STATUS:
 	var o = range(0, item.h*item.w)
 	var sort_lambda = func(a:int, b:int) -> bool:
 		@warning_ignore("integer_division")
-		var d1:int = abs((a / item.w) - item.origin[0]) + abs((a % item.w) - item.origin[1])
+		var d1:int = abs((a / item.w) - item.cell_origin[0]) + abs((a % item.w) - item.cell_origin[1])
 		@warning_ignore("integer_division")
-		var d2:int = abs((b / item.w) - item.origin[0]) + abs((b % item.w) - item.origin[1])
+		var d2:int = abs((b / item.w) - item.cell_origin[0]) + abs((b % item.w) - item.cell_origin[1])
 		return d1 < d2
 	o.sort_custom(sort_lambda)
 	#print("custom order: ", o, " normal: ", range(item.h*item.w))

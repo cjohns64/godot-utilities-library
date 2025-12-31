@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://xexgivj5yp3t"]
+[gd_scene load_steps=3 format=3 uid="uid://xexgivj5yp3t"]
 
 [ext_resource type="Script" uid="uid://h6qwubrbv1qc" path="res://TileInventory/item.gd" id="1_k3f00"]
+[ext_resource type="Texture2D" uid="uid://cl8hp36uy60qc" path="res://icon.svg" id="2_j30bj"]
 
 [node name="Item" type="Node"]
 script = ExtResource("1_k3f00")
@@ -8,3 +9,13 @@ h = 4
 w = 4
 shape_str = "0011010101110100"
 metadata/_custom_type_script = "uid://h6qwubrbv1qc"
+
+[node name="Icon" type="TextureRect" parent="."]
+visible = false
+self_modulate = Color(1, 1, 1, 0.58431375)
+offset_right = 128.0
+offset_bottom = 128.0
+mouse_filter = 2
+texture = ExtResource("2_j30bj")
+expand_mode = 1
+stretch_mode = 3
