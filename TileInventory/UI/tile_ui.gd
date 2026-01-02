@@ -21,13 +21,15 @@ func _on_remove_button_pressed() -> void:
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	if data is ItemImage:
-		var loc:Vector2i = inventory_ref.get_coords(index)
-		# TODO remove item first
+		#var loc:Vector2i = inventory_ref.get_coords(index)
 		#if inventory_ref.check(loc, inventory_ref.items[data.item_index]):
+		# _drop_data will check if move is allowed
 		return true
 	return false
 	
 func _drop_data(at_position: Vector2, data: Variant) -> void:
 	if data is ItemImage:
-		print("attpmpting move from ", data.item_index, " to loc ", inventory_ref.get_coords(index))
-		inventory_ref.try_move_index(data.item_index, inventory_ref.get_coords(index))
+		# item does not move unless it can
+		print("Tile drop:: attpmpting move from ", inventory_ref.item_pos[data.item_index], " to ", inventory_ref.get_coords(index))
+		var dropped:bool = inventory_ref.try_move_index(data.item_index, inventory_ref.get_coords(index))
+		data.show()
