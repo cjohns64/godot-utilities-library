@@ -14,7 +14,7 @@ var debug:bool = true
 @warning_ignore("integer_division")
 @onready var cell_origin:Vector2i = Vector2i(h/2, w/2)
 @onready var true_origin:Vector2 = Vector2(float(h)/2.0, float(w)/2.0)
-@onready var icon: TextureRect = $Icon
+@export var image = preload("res://icon.svg")
 
 func equals(item:Item) -> bool:
 	return item.ID == self.ID
@@ -23,7 +23,7 @@ func _copy_metadata(item:Item) -> void:
 	self.ID = item.ID
 	self.max_item_stack = item.max_item_stack
 	self.item_stacking = item.item_stacking
-	self.icon = item.icon
+	self.image = item.image
 	self.rotation = item.rotation
 
 func _to_string() -> String:
@@ -66,7 +66,7 @@ func get_abs_offset(rel_offset:Vector2i) -> Vector2i:
 
 func _ready():
 	self.init_shape()
-	self.print_shape()
+	#self.print_shape()
 
 func __transpose() -> Item:
 	var new_item = Item.new(w, h) # reversed width and height

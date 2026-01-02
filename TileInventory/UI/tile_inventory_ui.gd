@@ -7,15 +7,18 @@ extends Control
 @export var tile_res:PackedScene = preload("res://TileInventory/UI/tile_ui.tscn")
 var tile_size:float = 40
 var ui_cells:Array[Control] = []
-var active_icons:Array[Control] = []
+var active_icons:Array[ItemImage] = []
 @export var empty_color:Color
 @export var filled_color:Color
 signal click_event(location:Vector2i, is_left:bool)
 
+func _ready() -> void:
+	SignalBus.tile_ui_changed.connect(on_tile_ui_changed)
+
 func set_tile_size() -> void:
 	grid_container.set_columns(inventory.w)
 	grid_container.set_custom_minimum_size(Vector2(inventory.w * tile_size, inventory.h * tile_size))
-	print("ui column update (set, current) ", inventory.w, " ", grid_container.get_columns())
+	#print("ui column update (set, current) ", inventory.w, " ", grid_container.get_columns())
 	ui_cells = []
 	ui_cells.resize(inventory.w * inventory.h)
 	for i in inventory.w * inventory.h:
@@ -31,7 +34,8 @@ func update_item_icons() -> void:
 		n.queue_free()
 	active_icons = []
 	for i in len(inventory.items):
-		var icon:Control = inventory.items[i].icon.duplicate()
+		var icon:ItemImage = ItemImage.new()
+		icon.setup(inventory.items[i].image, i, inventory)
 		var item:Item = inventory.items[i]
 		var org:Vector2 = Vector2(inventory.items[i].cell_origin) - inventory.items[i].true_origin
 		var pos:Vector2 = inventory.item_pos[i]
@@ -62,7 +66,7 @@ func update_highlight(selected:Vector2i) -> void:
 				ui_cells[row*inventory.w + col].set_status(empty_color, is_selected)
 
 func on_click_event(index:int, is_left:bool) -> void:
-	var col:int = index % inventory.w
-	var row:int = index / inventory.w
-	print("click event at ", row, " ", col, " ", is_left)
-	click_event.emit(Vector2i(row, col), is_left)
+	click_event.emit(inventory.get_coords(index), is_left)
+
+func on_tile_ui_changed(selected:Vector2i) -> void:
+	self.update_highlight(selected)

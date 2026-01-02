@@ -136,13 +136,13 @@ func check(rel_offset:Vector2i, item:Item, stack_amount:int=1) -> CHECK_STATUS:
 		var col:int = i % item.w
 		if not item.get_cell(row, col):
 			continue # only check cells that the item uses
-		print("checking cell ", row, " col ", col)
+		#print("checking cell ", row, " col ", col)
 		# check if stacking is allowed
 		if item_indexes and __is_stacking_enabled(item_indexes[0]):
 			# stacking is allowed
 			# only allow overlap with the same item type
 			var target_index:int = self.index_at_pos(Vector2i(row + abs_offset[0], col + abs_offset[1]))
-			print("target pos: ", Vector2i(row + abs_offset[0], col + abs_offset[1]))
+			#print("target pos: ", Vector2i(row + abs_offset[0], col + abs_offset[1]))
 			if target_index == -1:
 				# empty tile
 				pass # does not affect check result
@@ -229,16 +229,22 @@ func check_add(offset:Vector2i, item:Item, stack:int=1) -> bool:
 func try_move(from:Vector2i, to:Vector2i) -> bool:
 	return try_move_and_rotate(from, to, 0)
 
+func try_move_index(fromIndex:int, to:Vector2i) -> bool:
+	return try_move_and_rotate_index(fromIndex, to, 0)
+
 func try_move_and_rotate(from:Vector2i, to:Vector2i, left_rotations:int, full_stack:bool=false) -> bool:
 	# get item at from location
 	var index:int = self.index_at_pos(from)
 	if index == -1:
 		return false # failed to find from item
+	return try_move_and_rotate_index(index, to, left_rotations, full_stack)
+	
+func try_move_and_rotate_index(fromIndex:int, to:Vector2i, left_rotations:int, full_stack:bool=false) -> bool:
 	# cache item
-	var from_item:Item = self.items[index]
-	var from_item_offset:Vector2i = self.item_pos[index]
+	var from_item:Item = self.items[fromIndex]
+	var from_item_offset:Vector2i = self.item_pos[fromIndex]
 	# remove from inventory
-	var removed_amount:int = self.remove_item_by_index(index, full_stack)
+	var removed_amount:int = self.remove_item_by_index(fromIndex, full_stack)
 	# rotate
 	var rotated_item:Item = from_item
 	if left_rotations % 4 > 0:
@@ -249,6 +255,7 @@ func try_move_and_rotate(from:Vector2i, to:Vector2i, left_rotations:int, full_st
 			rotated_item = rotated_item.rotate_right()
 	# add to new location
 	if self.check_add(to, rotated_item, removed_amount):
+		SignalBus.tile_ui_changed.emit(to)
 		return true # item moved successfully
 	# move back to starting location with original rotation
 	if self.check_add(from_item_offset, from_item, removed_amount):
