@@ -15,20 +15,12 @@ script = ExtResource("1_7thgn")
 empty_color = Color(0.20511743, 0.20511743, 0.20511743, 1)
 filled_color = Color(0, 0.38431373, 1, 1)
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 0
 offset_left = 15.0
 offset_top = 15.0
-offset_right = -15.0
-offset_bottom = 55.0
-grow_horizontal = 2
-
-[node name="GridContainer" type="GridContainer" parent="PanelContainer"]
-custom_minimum_size = Vector2(500, 500)
-layout_mode = 2
+offset_right = 515.0
+offset_bottom = 515.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_constants/h_separation = 1

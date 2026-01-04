@@ -1,4 +1,5 @@
 extends Control
+# testing UI for development, not expected to be used in the final build
 
 @onready var tile_inventory_ui: Control = $PanelContainer/HBoxContainer/TileInventory_UI
 @onready var items: Node = $Items

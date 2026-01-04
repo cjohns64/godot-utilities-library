@@ -4,11 +4,15 @@ var item_index:int
 var inv:TileInventory
 
 func setup(_texture:Texture, _index:int, _inventory:TileInventory) -> void:
+	# setup function for ItemImage Nodes, should be called by every new instance once the index is known
+	# this is not in _ready since it interferes with duplicate()
 	self.texture = _texture
 	self.set_size(_texture.get_size())
 	self.item_index = _index
 	self.inv = _inventory
 
+# Enable dragging of ItemImages,
+# drag data is this ItemImage, preview is the TextureRect
 func _get_drag_data(at_position: Vector2) -> Variant:
 	print("drag started at ", at_position, " index: ", self.item_index)
 	if item_index >= 0 and item_index < len(inv.items):
@@ -29,7 +33,7 @@ func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	if data is ItemImage:
 		# check if types match
 		if inv.items[self.item_index].equals(inv.items[data.item_index]):
-			# check if destination stack can recive the dragging stack
+			# check if destination stack can receive the dragging stack
 			if inv.check_stacking(self.item_index, inv.item_count[data.item_index]):
 				return true
 	return false
@@ -38,6 +42,6 @@ func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 func _drop_data(at_position: Vector2, data: Variant) -> void:
 	if data is ItemImage:
 		# item does not move unless it can
-		print("image drop:: attpmpting move from ", inv.item_pos[data.item_index], " to ", inv.item_pos[self.item_index])
+		print("image drop:: attempting move from ", inv.item_pos[data.item_index], " to ", inv.item_pos[self.item_index])
 		var dropped:bool = inv.try_move_index(data.item_index, inv.item_pos[self.item_index])
 		data.show()

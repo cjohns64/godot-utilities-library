@@ -1,24 +1,39 @@
 class_name Item extends Node
+# Parent class for Items, intended to be extended by new item classes.
+# provides only basic inventory stacking/management operation
 
+# height and width of the item in cells
 @export_range(0, 100) var h:int
 @export_range(0, 100) var w:int
+# item ID, used for uniquely identifying the item
 @export var ID:String = "item"
+# stacking limits for item
 @export_range(1, 999) var max_item_stack:int = 3
 @export var item_stacking:bool = true
 # string used to initialize the shape
 @export var shape_str:String
 # matrix representing the shape of the item
 var shape:Array[bool] = []
+# the logical rotation of the item, used for rotating the item image to match the cell rotation
 var rotation:float = 0
+# flag for debug code
 var debug:bool = true
+# cell and true origin
+# cell origin is used for all operations based off of the shape of the item
+# true origin is used for the item image location
 @warning_ignore("integer_division")
 @onready var cell_origin:Vector2i = Vector2i(h/2, w/2)
 @onready var true_origin:Vector2 = Vector2(float(h)/2.0, float(w)/2.0)
+# resource to use for the item image, it will be scaled to fit the item shape
 @export var image = preload("res://icon.svg")
 
+# function for determining if two items are equal,
+# use this function instead of the '==' operation
 func equals(item:Item) -> bool:
 	return item.ID == self.ID
 
+# function for copying all metadata associated with the item
+# use this function instead of copying data manually, this allows new metadata to be added later
 func _copy_metadata(item:Item) -> void:
 	self.ID = item.ID
 	self.max_item_stack = item.max_item_stack
@@ -44,6 +59,9 @@ func recalculate_origin() -> void:
 	cell_origin = Vector2i((h-1)/2, (w-1)/2)
 	true_origin = Vector2(float(h)/2.0, float(w)/2.0)
 
+# function for setting up the item shape
+# initializes shape to the shape string if it is defined
+# otherwise sets the shape to all empty
 func init_shape() -> void:
 	# setup item shape matrix
 	shape = []
@@ -66,7 +84,6 @@ func get_abs_offset(rel_offset:Vector2i) -> Vector2i:
 
 func _ready():
 	self.init_shape()
-	#self.print_shape()
 
 func __transpose() -> Item:
 	var new_item = Item.new(w, h) # reversed width and height
